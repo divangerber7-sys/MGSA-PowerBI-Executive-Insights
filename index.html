@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>MGSA Power BI Executive Insights Dashboard — Independent Portfolio Exercise</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1B3A5C;--blue:#2E75B6;--purple:#5C3A7A;--teal:#0D6E6E;
+  --text:#1A1A1A;--text2:#595959;--border:#CCCCCC;
+  --bg:#F8F9FA;--bg2:#F2F2F2;
+  --rf:#F4CCCC;--rt:#A61C00;
+  --of:#FCE4D6;--ot:#C55A11;
+  --af:#FFF3CD;--at:#9C6500;
+  --gf:#D9EAD3;--gt:#1E6B3C;
+  --bf:#D6E4F0;--bt:#1B3A5C;
+  --pf:#EDE4F5;--pt:#5C3A7A;
+}
+body{font-family:Arial,Helvetica,sans-serif;font-size:14px;color:var(--text);background:#fff}
+
+/* ── HEADER ── */
+.pg-hdr{background:var(--navy);display:flex;flex-direction:column}
+.hdr-top{display:flex;justify-content:space-between;align-items:center;padding:14px 24px 0}
+.hdr-org{font-size:11px;font-weight:700;color:rgba(255,255,255,.65);letter-spacing:.1em;text-transform:uppercase}
+.hdr-ref{font-size:11px;color:rgba(255,255,255,.4);letter-spacing:.04em}
+.hdr-main{padding:12px 24px 0}
+.hdr-title{font-size:26px;font-weight:700;color:#fff;letter-spacing:-.3px}
+.hdr-sub{font-size:13px;color:rgba(255,255,255,.65);margin-top:4px}
+
+/* ── PURE-CSS TABS ── */
+.tab-radios{display:none}
+.tab-bar{display:flex;padding:0 24px;gap:0;overflow-x:auto;margin-top:12px}
+.tab{padding:12px 20px;font-size:13px;font-weight:700;cursor:pointer;color:rgba(255,255,255,.5);border-bottom:3px solid transparent;white-space:nowrap;font-family:Arial,Helvetica,sans-serif;transition:color .15s,border-color .15s;user-select:none}
+.tab:hover{color:rgba(255,255,255,.85)}
+.panel{display:none;padding:24px}
+
+#t1:checked ~ .pg-hdr .tab[for="t1"],
+#t2:checked ~ .pg-hdr .tab[for="t2"],
+#t3:checked ~ .pg-hdr .tab[for="t3"],
+#t4:checked ~ .pg-hdr .tab[for="t4"],
+#t5:checked ~ .pg-hdr .tab[for="t5"],
+#t6:checked ~ .pg-hdr .tab[for="t6"],
+#t7:checked ~ .pg-hdr .tab[for="t7"]
+{color:#fff;border-bottom-color:rgba(255,255,255,.9)}
+
+#t1:checked ~ #p1,
+#t2:checked ~ #p2,
+#t3:checked ~ #p3,
+#t4:checked ~ #p4,
+#t5:checked ~ #p5,
+#t6:checked ~ #p6,
+#t7:checked ~ #p7
+{display:block}
+
+/* ── METRIC CARDS ── */
+.mrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px}
+.mc{background:var(--bg);border:.5px solid var(--border);border-radius:6px;padding:14px 16px}
+.ml{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);margin-bottom:4px}
+.mv{font-size:24px;font-weight:700}
+.ms{font-size:11px;color:var(--text2);margin-top:3px}
+
+/* ── SECTION TITLE ── */
+.st{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--navy);margin-bottom:10px}
+
+/* ── BADGES ── */
+.badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:3px;white-space:nowrap}
+.bc{background:var(--rf);color:var(--rt)}
+.bh{background:var(--of);color:var(--ot)}
+.bm{background:var(--af);color:var(--at)}
+.bg{background:var(--gf);color:var(--gt)}
+.bp{background:var(--bf);color:var(--bt)}
+.bpu{background:var(--pf);color:var(--pt)}
+
+/* ── TABLES ── */
+.tw{overflow-x:auto;border:.5px solid var(--border);border-radius:6px;margin-bottom:16px}
+.tw.sh{max-height:460px;overflow-y:auto}
+.dt{width:100%;border-collapse:collapse;font-size:12px}
+.dt th{background:var(--navy);color:#fff;padding:9px 10px;font-weight:700;font-size:11px;text-align:left;position:sticky;top:0;z-index:2;white-space:nowrap;letter-spacing:.05em;text-transform:uppercase}
+.dt td{padding:8px 10px;border-bottom:.5px solid var(--border);vertical-align:top}
+.dt tr:last-child td{border-bottom:none}
+.dt tr:hover td{background:var(--bg2)}
+.dt td.ctr{text-align:center;vertical-align:middle}
+.dt td.num{text-align:right;font-variant-numeric:tabular-nums;vertical-align:middle}
+.dt td.mid{vertical-align:middle}
+
+/* ── LAYOUT ── */
+.cg{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.cg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px}
+.cb{background:var(--bg);border:.5px solid var(--border);border-radius:6px;padding:14px;margin-bottom:16px}
+.cb0{background:var(--bg);border:.5px solid var(--border);border-radius:6px;padding:14px;margin-bottom:0}
+
+/* ── CARDS ── */
+.card{background:#fff;border:.5px solid var(--border);border-left:4px solid;border-radius:6px;padding:12px 14px;margin-bottom:10px}
+.card:last-child{margin-bottom:0}
+.card-hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px}
+.card-title{font-size:13px;font-weight:700;flex:1}
+.card-sub{font-size:12px;color:var(--text2);line-height:1.55}
+
+/* ── PROGRESS BARS ── */
+.cbar-wrap{margin-bottom:9px}
+.cbar-wrap:last-child{margin-bottom:0}
+.cbar-label{display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px}
+.cbar{height:12px;background:var(--bg2);border-radius:3px;overflow:hidden}
+.cbar-fill{height:100%;border-radius:3px}
+
+/* ── STAT ROWS ── */
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:.5px solid var(--border);font-size:12px}
+.stat-row:last-child{border-bottom:none}
+.stat-label{color:var(--text2);flex:1;padding-right:8px}
+.stat-val{font-weight:700;text-align:right;flex-shrink:0}
+
+/* ── NOTICES ── */
+.notice{border:.5px solid;border-radius:6px;padding:11px 13px;margin-bottom:10px;font-size:12px;line-height:1.6}
+.notice:last-child{margin-bottom:0}
+.notice-r{background:var(--rf);border-color:#E24B4A;color:var(--rt)}
+.notice-a{background:var(--of);border-color:#EF9F27;color:var(--ot)}
+.notice-g{background:var(--gf);border-color:#4CAF50;color:var(--gt)}
+.notice-b{background:var(--bf);border-color:var(--blue);color:var(--bt)}
+.notice-p{background:var(--pf);border-color:var(--purple);color:var(--pt)}
+
+/* ── RAG DOTS ── */
+.rag{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:middle;flex-shrink:0}
+.rag-r{background:#E24B4A}
+.rag-a{background:#EF9F27}
+.rag-g{background:#4CAF50}
+.rag-b{background:#2E75B6}
+.rag-p{background:#5C3A7A}
+
+/* ── VALUE COLOURS ── */
+.v-g{color:var(--gt);font-weight:700}
+.v-a{color:var(--at);font-weight:700}
+.v-r{color:var(--rt);font-weight:700}
+.v-b{color:var(--bt);font-weight:700}
+
+/* ── FUNNEL ── */
+.funnel{display:flex;flex-direction:column;gap:6px}
+.funnel-tier{border-radius:4px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
+.funnel-label{font-size:12px;font-weight:700}
+.funnel-count{font-size:20px;font-weight:700}
+.funnel-sub{font-size:11px;opacity:.8}
+.ft-1{background:var(--rf);color:var(--rt)}
+.ft-2{background:var(--of);color:var(--ot)}
+.ft-3{background:var(--af);color:var(--at)}
+.ft-4{background:var(--gf);color:var(--gt)}
+.ft-5{background:var(--bf);color:var(--bt)}
+
+/* ── OWNER BLOCK ── */
+.owner-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.owner-card{background:#fff;border:.5px solid var(--border);border-radius:6px;border-top:3px solid;padding:11px 13px}
+.owner-tier{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text2);margin-bottom:4px}
+.owner-name{font-size:13px;font-weight:700;margin-bottom:2px}
+.owner-role{font-size:11px;color:var(--text2);margin-bottom:6px}
+
+/* ── TIMELINE ── */
+.tl{position:relative;padding-left:22px}
+.tl::before{content:'';position:absolute;left:4px;top:6px;bottom:6px;width:2px;background:var(--border)}
+.tl-item{position:relative;margin-bottom:14px;padding-bottom:14px;border-bottom:.5px solid var(--border)}
+.tl-item:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.tl-dot{position:absolute;left:-18px;top:3px;width:12px;height:12px;border-radius:50%;border:2px solid #fff}
+.tl-time{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+.tl-actor{font-size:11px;color:var(--blue);font-weight:700;margin-bottom:2px}
+.tl-title{font-size:12px;font-weight:700;margin-bottom:2px}
+.tl-desc{font-size:12px;color:var(--text2);line-height:1.5}
+
+/* ── ESC STRIP (generic grid strip) ── */
+.esc-strip{background:#fff;border:.5px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:16px}
+.esc-hdr{display:grid;background:var(--navy);padding:8px 10px;gap:0}
+.esc-hdr span{font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.05em}
+.esc-row{display:grid;padding:8px 10px;border-bottom:.5px solid var(--border);font-size:12px;align-items:start;gap:0}
+.esc-row:last-child{border-bottom:none}
+.esc-row:hover{background:var(--bg2)}
+.esc-ref{font-weight:700;color:var(--navy)}
+.esc-age{color:var(--text2);font-size:11px}
+.esc-desc{line-height:1.5;padding:0 8px}
+.esc-owner{font-weight:700;font-size:11px;padding-right:6px}
+.esc-stat{text-align:center}
+.esc-due{text-align:right;font-size:11px;color:var(--text2);padding-right:6px}
+.esc-pri{text-align:right}
+
+/* ── BREACH PILLS ── */
+.breach-pill{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;white-space:nowrap}
+.breach-r{background:var(--rt);color:#fff}
+.breach-a{background:var(--ot);color:#fff}
+.breach-g{background:var(--gt);color:#fff}
+.breach-b{background:var(--blue);color:#fff}
+.breach-p{background:var(--purple);color:#fff}
+
+/* ── ACTION ROW ── */
+.act-row{display:flex;gap:10px;padding:9px 0;border-bottom:.5px solid var(--border);font-size:12px;align-items:flex-start}
+.act-row:last-child{border-bottom:none}
+.act-ref{min-width:76px;font-weight:700;flex-shrink:0;color:var(--navy)}
+.act-body{flex:1}
+.act-title{font-weight:700;margin-bottom:2px}
+.act-desc{color:var(--text2);line-height:1.5}
+.act-meta{display:flex;gap:8px;margin-top:4px;flex-wrap:wrap}
+
+/* ── RACI TABLE ── */
+.raci-table{width:100%;border-collapse:collapse}
+.raci-hdr{background:var(--navy);color:#fff;font-size:11px;font-weight:700;text-align:center;padding:8px 6px;border:.5px solid var(--border);letter-spacing:.04em;white-space:nowrap}
+.raci-lbl{background:var(--bg);font-size:12px;font-weight:700;padding:8px 10px;border:.5px solid var(--border);vertical-align:middle}
+.raci-g{background:var(--gf);color:var(--gt);font-weight:700;text-align:center;padding:6px;border:.5px solid var(--border);font-size:11px}
+.raci-b{background:var(--bf);color:var(--bt);font-weight:700;text-align:center;padding:6px;border:.5px solid var(--border);font-size:11px}
+.raci-a{background:var(--af);color:var(--at);font-weight:700;text-align:center;padding:6px;border:.5px solid var(--border);font-size:11px}
+.raci-n{background:var(--bg2);color:var(--text2);text-align:center;padding:6px;border:.5px solid var(--border);font-size:11px}
+
+/* ── KPI SCORECARD STRIP (7-col) ── */
+.kpi-cols{grid-template-columns:180px 1fr 90px 90px 90px 80px 90px}
+
+/* ── WORKSPACE STRIP (6-col) ── */
+.ws-cols{grid-template-columns:160px 1fr 80px 90px 90px 90px}
+
+/* ── REPORT STRIP (7-col) ── */
+.rpt-cols{grid-template-columns:90px 140px 1fr 80px 80px 70px 80px}
+
+/* ── CAPACITY CARDS ── */
+.cap-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.cap-card{background:#fff;border:.5px solid var(--border);border-radius:6px;border-top:3px solid;padding:11px 13px}
+.cap-fn{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text2);margin-bottom:4px}
+.cap-name{font-size:12px;font-weight:700;margin-bottom:8px}
+.cap-val{font-size:20px;font-weight:700;margin-bottom:4px}
+.cap-bar{height:8px;background:var(--bg2);border-radius:3px;overflow:hidden;margin-bottom:6px}
+.cap-bar-fill{height:100%;border-radius:3px}
+.cap-meta{font-size:11px;color:var(--text2)}
+
+/* ── SPARKLINE (pure-CSS bar column) ── */
+.spark-row{display:flex;align-items:flex-end;gap:3px;height:36px;margin-top:6px}
+.spark-bar{flex:1;border-radius:2px 2px 0 0;min-height:3px}
+
+/* ── TREND CHIP ── */
+.chip{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px}
+.chip-g{background:var(--gf);color:var(--gt)}
+.chip-r{background:var(--rf);color:var(--rt)}
+.chip-a{background:var(--af);color:var(--at)}
+
+/* ── BIG KPI BLOCK ── */
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:20px}
+.kpi-card{background:var(--bg);border:.5px solid var(--border);border-radius:6px;padding:16px;border-top:4px solid}
+.kpi-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text2);margin-bottom:6px}
+.kpi-val{font-size:32px;font-weight:700;line-height:1;margin-bottom:4px}
+.kpi-sub{font-size:11px;color:var(--text2)}
+.kpi-trend{margin-top:8px}
+
+p.intro{font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6}
+
+/* ── PORTFOLIO DISCLAIMER ── */
+.portfolio-disclaimer{
+  position:sticky;top:0;z-index:9999;width:100%;
+  background:#7A1F1F;color:#ffffff;
+  font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.5;
+  padding:10px 16px;box-sizing:border-box;text-align:center;
+  border-bottom:3px solid #4a1212;
+}
+.portfolio-disclaimer strong{font-weight:700}
+.portfolio-disclaimer a{color:#ffffff;text-decoration:underline;font-weight:700}
+@media (max-width:640px){.portfolio-disclaimer{font-size:12px;padding:10px 12px}}
+.portfolio-about{max-width:1100px;margin:32px auto 40px;padding:20px 24px;border:1px solid var(--border);border-left:4px solid #7A1F1F;background:var(--bg);font-size:13px;line-height:1.6;color:var(--text2);scroll-margin-top:90px}
+.portfolio-about h2{font-size:15px;color:var(--navy);margin-bottom:8px}
+.portfolio-about p+p{margin-top:8px}
+.pd-short{display:none}
+.cg>*,.cg3>*,.mrow>*{min-width:0}
+.esc-strip{overflow-x:auto}
+
+/* ── RESPONSIVE ── */
+@media (max-width:900px){
+  .cg3{grid-template-columns:1fr 1fr}
+  .kpi-grid{grid-template-columns:1fr 1fr}
+}
+@media (max-width:760px){
+  .pd-full{display:none}.pd-short{display:inline}
+  .cg,.cg3,.owner-grid{grid-template-columns:1fr}
+  .panel{padding:16px}
+  .hdr-top{flex-wrap:wrap;gap:4px;padding:12px 16px 0}
+  .hdr-main{padding:10px 16px 0}.hdr-title{font-size:21px}
+  .tab-bar{padding:0 8px}.tab{padding:12px 14px}
+  .cb0,.cb{overflow-x:auto}
+  .esc-hdr,.esc-row{min-width:760px}
+  .kpi-grid-none{min-width:760px}
+  .dt{min-width:440px}
+  .stat-row{gap:10px}.stat-val{text-align:right}
+  .cbar-label{gap:10px}
+  .act-row{flex-wrap:wrap}
+  .portfolio-about{margin:24px 16px 32px;padding:16px}
+}
+</style>
+</head>
+<body>
+
+<div class="portfolio-disclaimer">
+  &#9888; <strong>Fictional company &amp; data &mdash; independent portfolio exercise by Divan Gerber.</strong>
+  <span class="pd-short">Not a role held or real employer information. All figures simulated; real vendor names used illustratively.</span>
+  <span class="pd-full">All organizations, figures, and scenarios on this site are simulated for demonstration purposes.
+  Not a role held or real employer information. This page names several real companies and products (including Microsoft Power BI and Azure, Oracle, AWS, SAP and Zebra) and real statutes and regulators (POPIA, PAIA, the Information Regulator) within an entirely fictional operational scenario. Every revenue figure, KPI, incident, vendor SLA breach, contract decision, programme budget and compliance finding shown is invented for this exercise and does not describe any real system, contract, breach or event involving those companies or bodies. The Board, executive and committee decisions and the roles shown are simulated scenario content, not decisions that happened. This is a static design prototype, not a live monitoring feed.</span>
+  <a href="#about-this-portfolio">Read more</a>
+</div>
+
+<input class="tab-radios" type="radio" name="tabs" id="t1" checked>
+<input class="tab-radios" type="radio" name="tabs" id="t2">
+<input class="tab-radios" type="radio" name="tabs" id="t3">
+<input class="tab-radios" type="radio" name="tabs" id="t4">
+<input class="tab-radios" type="radio" name="tabs" id="t5">
+<input class="tab-radios" type="radio" name="tabs" id="t6">
+<input class="tab-radios" type="radio" name="tabs" id="t7">
+
+<div class="pg-hdr">
+  <div class="hdr-top">
+    <div class="hdr-org">MedRetail Group South Africa (Fictional)</div>
+    <div class="hdr-ref">Independent Portfolio Exercise &nbsp;|&nbsp; Simulated period: June 2026</div>
+  </div>
+  <div class="hdr-main">
+    <div class="hdr-title">Power BI Executive Insights Dashboard</div>
+    <div class="hdr-sub">R4.82B revenue YTD &bull; 94.2% service SLA &bull; 78.4% data quality &bull; 14 active AI use cases &bull; 3 141 analytics users &bull; Simulated snapshot: 22 Jun 2026 (static data, not a live feed)</div>
+  </div>
+  <div class="tab-bar">
+    <label class="tab" for="t1">Executive Summary</label>
+    <label class="tab" for="t2">Financial Performance</label>
+    <label class="tab" for="t3">Operations &amp; Service</label>
+    <label class="tab" for="t4">Customer &amp; Loyalty</label>
+    <label class="tab" for="t5">People &amp; Capability</label>
+    <label class="tab" for="t6">Technology &amp; Data</label>
+    <label class="tab" for="t7">Strategic Programmes</label>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     PANEL 1 — EXECUTIVE SUMMARY
+═════════════════════════════════════════════ -->
+<div class="panel" id="p1">
+
+  <div class="notice notice-a">
+    <strong>3 strategic items require Board or executive decision by 31 July 2026:</strong> GPU infrastructure for AI Demand Forecasting v2 (CTO sign-off, R620k p.a.), AI Ethics Framework Board approval (patient-facing use cases gated), and Oracle database contract renewal (expires Aug 2026 &mdash; no signed renewal). Combined value at risk: R3.5M FY2026 targets.
+  </div>
+
+  <!-- Big KPI row -->
+  <div class="kpi-grid" style="margin-top:16px">
+    <div class="kpi-card" style="border-top-color:var(--navy)">
+      <div class="kpi-label">Revenue YTD</div>
+      <div class="kpi-val">R4.82B</div>
+      <div class="kpi-sub">vs R4.68B target &bull; +3.0%</div>
+      <div class="kpi-trend"><span class="chip chip-g">&#9650; +3.0% vs target</span></div>
+    </div>
+    <div class="kpi-card" style="border-top-color:var(--gt)">
+      <div class="kpi-label">Gross Margin</div>
+      <div class="kpi-val v-g">28.4%</div>
+      <div class="kpi-sub">vs 27.8% prior year</div>
+      <div class="kpi-trend"><span class="chip chip-g">&#9650; +60bps YoY</span></div>
+    </div>
+    <div class="kpi-card" style="border-top-color:var(--ot)">
+      <div class="kpi-label">Operating Cost Ratio</div>
+      <div class="kpi-val v-a">21.6%</div>
+      <div class="kpi-sub">vs 20.9% target</div>
+      <div class="kpi-trend"><span class="chip chip-r">&#9660; 70bps over target</span></div>
+    </div>
+    <div class="kpi-card" style="border-top-color:var(--teal)">
+      <div class="kpi-label">EBITDA Margin</div>
+      <div class="kpi-val v-g">9.1%</div>
+      <div class="kpi-sub">vs 8.8% prior year</div>
+      <div class="kpi-trend"><span class="chip chip-g">&#9650; +30bps YoY</span></div>
+    </div>
+  </div>
+
+  <div class="cg">
+    <div>
+      <!-- Strategic health scorecard -->
+      <div class="cb">
+        <div class="st">Group strategic health &mdash; June 2026</div>
+        <div class="stat-row"><span class="stat-label"><span class="rag rag-g"></span><strong>Financial Performance</strong></span><span class="stat-val"><span class="badge bg">On Track</span></span></div>
+        <div class="stat-row"><span class="stat-label"><span class="rag rag-a"></span><strong>Service &amp; Operations SLA</strong></span><span class="stat-val"><span class="badge bh">94.2% &mdash; below 95% target</span></span></div>
+        <div class="stat-row"><span class="stat-label"><span class="rag rag-a"></span><strong>Customer &amp; Loyalty</strong></span><span class="stat-val"><span class="badge bh">NPS +41 &mdash; declining</span></span></div>
+        <div class="stat-row"><span class="stat-label"><span class="rag rag-g"></span><strong>Supply Chain</strong></span><span class="stat-val"><span class="badge bg">DIFOT 94.8%</span></span></div>
+        <div class="stat-row"><span class="stat-label"><span class="rag rag-a"></span><strong>Data Quality</strong></span><span class="stat-val"><span class="badge bh">78.4% &mdash; below 85% target</span></span></div>
+        <div class="stat-row"><span class="stat-label"><span class="rag rag-r"></span><strong>POPIA Compliance</strong></span><span class="stat-val"><span class="badge bc">81% &mdash; 3 open findings</span></span></div>
+        <div class="stat-row"><span class="stat-label"><span class="rag rag-a"></span><strong>AI Programme</strong></span><span class="stat-val"><span class="badge bh">R4.2M vs R7.8M target</span></span></div>
+        <div class="stat-row"><span class="stat-label"><span class="rag rag-g"></span><strong>Staff Engagement</strong></span><span class="stat-val"><span class="badge bg">eNPS +38</span></span></div>
+        <div class="stat-row"><span class="stat-label"><span class="rag rag-a"></span><strong>Cyber &amp; Security</strong></span><span class="stat-val"><span class="badge bh">3 unpatched CVEs</span></span></div>
+        <div class="stat-row"><span class="stat-label"><span class="rag rag-g"></span><strong>Retail Expansion</strong></span><span class="stat-val"><span class="badge bg">4 new stores on plan</span></span></div>
+      </div>
+
+      <!-- Revenue trend bars -->
+      <div class="cb0">
+        <div class="st">Monthly revenue trend &mdash; Jan to Jun 2026 (R million)</div>
+        <div class="cbar-wrap">
+          <div class="cbar-label"><span>January</span><span style="font-weight:700">R762M</span></div>
+          <div class="cbar"><div class="cbar-fill" style="width:79%;background:var(--navy)"></div></div>
+        </div>
+        <div class="cbar-wrap">
+          <div class="cbar-label"><span>February</span><span style="font-weight:700">R741M</span></div>
+          <div class="cbar"><div class="cbar-fill" style="width:77%;background:var(--navy)"></div></div>
+        </div>
+        <div class="cbar-wrap">
+          <div class="cbar-label"><span>March</span><span style="font-weight:700">R818M</span></div>
+          <div class="cbar"><div class="cbar-fill" style="width:85%;background:var(--blue)"></div></div>
+        </div>
+        <div class="cbar-wrap">
+          <div class="cbar-label"><span>April</span><span style="font-weight:700">R794M</span></div>
+          <div class="cbar"><div class="cbar-fill" style="width:82%;background:var(--blue)"></div></div>
+        </div>
+        <div class="cbar-wrap">
+          <div class="cbar-label"><span>May</span><span style="font-weight:700">R841M</span></div>
+          <div class="cbar"><div class="cbar-fill" style="width:87%;background:var(--teal)"></div></div>
+        </div>
+        <div class="cbar-wrap">
+          <div class="cbar-label"><span><strong>June</strong></span><span style="font-weight:700"><strong>R864M</strong></span></div>
+          <div class="cbar"><div class="cbar-fill" style="width:90%;background:var(--gt)"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <!-- Top decisions needed -->
+      <div class="cb">
+        <div class="st">Board &amp; executive decisions required</div>
+        <div class="card" style="border-left-color:var(--rt)">
+          <div class="card-hdr"><span class="card-title">AI Ethics Framework &mdash; Board approval</span><span class="badge bc">Board &mdash; 18 Sep</span></div>
+          <div class="card-sub">3 patient-facing AI use cases (R2.7M value) gated until Board-approved. DPO to table draft for consultation 31 Jul. Board presentation 18 Sep 2026.</div>
+        </div>
+        <div class="card" style="border-left-color:var(--rt)">
+          <div class="card-hdr"><span class="card-title">Oracle DB contract renewal &mdash; CIO decision</span><span class="badge bc">Due: 15 Jul</span></div>
+          <div class="card-sub">Contract expires Aug 2026. SLA breach on record. AWS RDS benchmarking underway as alternative. CIO position paper to CFO by 30 Jun. Decision by 15 Jul.</div>
+        </div>
+        <div class="card" style="border-left-color:var(--ot)">
+          <div class="card-hdr"><span class="card-title">GPU infrastructure for AI Demand Forecasting v2</span><span class="badge bh">Due: 30 Jun</span></div>
+          <div class="card-sub">Azure GPU reservation requires CTO sign-off on R620k p.a. commitment. Business case approved by CFO. R800k annual value at risk if delayed past Q3 2026.</div>
+        </div>
+        <div class="card" style="border-left-color:var(--ot)">
+          <div class="card-hdr"><span class="card-title">Power BI Premium capacity upgrade</span><span class="badge bh">Due: 15 Jul</span></div>
+          <div class="card-sub">Current P2 SKU throttling at peak hours (97.1% uptime vs 99.5% SLA). Options: P3 upgrade (+R380k p.a.) or autoscale. CDO decision required by 30 Jun for July implementation.</div>
+        </div>
+      </div>
+
+      <!-- KPI summary table -->
+      <div class="cb0">
+        <div class="st">Group KPI summary &mdash; June 2026 actuals vs targets</div>
+        <div class="tw" style="margin-bottom:0">
+          <table class="dt">
+            <thead>
+              <tr><th>KPI</th><th class="num">Target</th><th class="num">Actual</th><th class="ctr">vs Target</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="mid">Revenue growth (YoY)</td><td class="num">+5.0%</td><td class="num v-g">+6.8%</td><td class="ctr"><span class="badge bg">Above</span></td></tr>
+              <tr><td class="mid">Gross margin</td><td class="num">28.0%</td><td class="num v-g">28.4%</td><td class="ctr"><span class="badge bg">Above</span></td></tr>
+              <tr><td class="mid">EBITDA margin</td><td class="num">9.0%</td><td class="num v-g">9.1%</td><td class="ctr"><span class="badge bg">On Track</span></td></tr>
+              <tr><td class="mid">Operating cost ratio</td><td class="num">20.9%</td><td class="num v-a">21.6%</td><td class="ctr"><span class="badge bh">Over</span></td></tr>
+              <tr><td class="mid">Service SLA (overall)</td><td class="num">&ge;95.0%</td><td class="num v-a">94.2%</td><td class="ctr"><span class="badge bh">Miss</span></td></tr>
+              <tr><td class="mid">Customer NPS</td><td class="num">&ge;+45</td><td class="num v-a">+41</td><td class="ctr"><span class="badge bh">Miss</span></td></tr>
+              <tr><td class="mid">DIFOT (supply chain)</td><td class="num">&ge;95.0%</td><td class="num v-g">94.8%</td><td class="ctr"><span class="badge bm">Near</span></td></tr>
+              <tr><td class="mid">Data quality score</td><td class="num">&ge;85.0%</td><td class="num v-r">78.4%</td><td class="ctr"><span class="badge bc">Miss</span></td></tr>
+              <tr><td class="mid">POPIA compliance</td><td class="num">&ge;90.0%</td><td class="num v-r">81.0%</td><td class="ctr"><span class="badge bc">Miss</span></td></tr>
+              <tr><td class="mid">AI value realised YTD</td><td class="num">R7.8M</td><td class="num v-a">R4.2M</td><td class="ctr"><span class="badge bh">Behind</span></td></tr>
+              <tr><td class="mid">Staff eNPS</td><td class="num">&ge;+35</td><td class="num v-g">+38</td><td class="ctr"><span class="badge bg">Above</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     PANEL 2 — FINANCIAL PERFORMANCE
+═════════════════════════════════════════════ -->
+<div class="panel" id="p2">
+
+  <p class="intro">Financial performance is reported at Group level across Retail, Clinical/Pharmacy, and Distribution channels. All figures are management accounts (unaudited) prepared in accordance with IFRS Accounting Standards as applicable (simulated) and subject to external audit adjustment. Year-to-date reflects January to June 2026 (6 months, 50% of financial year).</p>
+
+  <div class="mrow">
+    <div class="mc"><div class="ml">Revenue YTD</div><div class="mv v-g">R4.82B</div><div class="ms">&#9650; +6.8% YoY</div></div>
+    <div class="mc"><div class="ml">Revenue vs Budget</div><div class="mv v-g">+3.0%</div><div class="ms">R141M ahead</div></div>
+    <div class="mc"><div class="ml">Gross Profit YTD</div><div class="mv v-g">R1.37B</div><div class="ms">28.4% margin</div></div>
+    <div class="mc"><div class="ml">EBITDA YTD</div><div class="mv v-g">R439M</div><div class="ms">9.1% margin</div></div>
+    <div class="mc"><div class="ml">Operating Costs YTD</div><div class="mv v-a">R1.04B</div><div class="ms">21.6% of revenue</div></div>
+    <div class="mc"><div class="ml">CapEx YTD</div><div class="mv">R284M</div><div class="ms">vs R310M budget</div></div>
+    <div class="mc"><div class="ml">Cash Position</div><div class="mv v-g">R618M</div><div class="ms">&#9650; +R84M vs May</div></div>
+    <div class="mc"><div class="ml">Net Debt / EBITDA</div><div class="mv v-g">1.4x</div><div class="ms">Target &le;2.5x</div></div>
+  </div>
+
+  <!-- P&L by channel -->
+  <div class="cb">
+    <div class="st">Revenue &amp; margin by channel &mdash; YTD June 2026</div>
+    <div class="tw" style="margin-bottom:0">
+      <table class="dt">
+        <thead>
+          <tr>
+            <th>Channel</th>
+            <th class="num">Revenue YTD (R)</th>
+            <th class="num">vs Budget</th>
+            <th class="num">YoY Growth</th>
+            <th class="num">Gross Margin</th>
+            <th class="num">EBITDA Margin</th>
+            <th class="ctr">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="mid"><strong>Retail (Front-of-Shop)</strong></td>
+            <td class="num">R2 841M</td><td class="num v-g">+4.2%</td><td class="num v-g">+7.4%</td>
+            <td class="num v-g">24.8%</td><td class="num v-g">8.2%</td>
+            <td class="ctr"><span class="badge bg">On Track</span></td>
+          </tr>
+          <tr>
+            <td class="mid"><strong>Clinical / Pharmacy</strong></td>
+            <td class="num">R1 482M</td><td class="num v-g">+2.1%</td><td class="num v-g">+5.8%</td>
+            <td class="num v-g">34.6%</td><td class="num v-g">11.4%</td>
+            <td class="ctr"><span class="badge bg">On Track</span></td>
+          </tr>
+          <tr>
+            <td class="mid"><strong>Distribution / Wholesale</strong></td>
+            <td class="num">R497M</td><td class="num v-a">-1.8%</td><td class="num v-g">+4.1%</td>
+            <td class="num v-a">18.2%</td><td class="num v-a">5.8%</td>
+            <td class="ctr"><span class="badge bh">Watch</span></td>
+          </tr>
+          <tr>
+            <td class="mid"><strong>Group Total</strong></td>
+            <td class="num"><strong>R4 820M</strong></td><td class="num v-g"><strong>+3.0%</strong></td><td class="num v-g"><strong>+6.8%</strong></td>
+            <td class="num v-g"><strong>28.4%</strong></td><td class="num v-g"><strong>9.1%</strong></td>
+            <td class="ctr"><span class="badge bg">On Track</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="cg">
+    <div class="cb0">
+      <div class="st">Operating cost breakdown &mdash; YTD June 2026</div>
+      <div class="cbar-wrap">
+        <div class="cbar-label"><span>Staff costs (salaries &amp; benefits)</span><span style="font-weight:700">R412M (39.6%)</span></div>
+        <div class="cbar"><div class="cbar-fill" style="width:100%;background:var(--navy)"></div></div>
+      </div>
+      <div class="cbar-wrap">
+        <div class="cbar-label"><span>Occupancy &amp; property</span><span style="font-weight:700">R224M (21.5%)</span></div>
+        <div class="cbar"><div class="cbar-fill" style="width:54%;background:var(--blue)"></div></div>
+      </div>
+      <div class="cbar-wrap">
+        <div class="cbar-label"><span>Technology &amp; platform</span><span style="font-weight:700">R148M (14.2%)</span></div>
+        <div class="cbar"><div class="cbar-fill" style="width:36%;background:var(--teal)"></div></div>
+      </div>
+      <div class="cbar-wrap">
+        <div class="cbar-label"><span>Logistics &amp; distribution</span><span style="font-weight:700">R112M (10.8%)</span></div>
+        <div class="cbar"><div class="cbar-fill" style="width:27%;background:var(--purple)"></div></div>
+      </div>
+      <div class="cbar-wrap">
+        <div class="cbar-label"><span>Marketing &amp; promotions</span><span style="font-weight:700">R84M (8.1%)</span></div>
+        <div class="cbar"><div class="cbar-fill" style="width:20%;background:#888"></div></div>
+      </div>
+      <div class="cbar-wrap">
+        <div class="cbar-label"><span>Other operating costs</span><span style="font-weight:700">R60M (5.8%)</span></div>
+        <div class="cbar"><div class="cbar-fill" style="width:15%;background:#aaa"></div></div>
+      </div>
+    </div>
+
+    <div class="cb0">
+      <div class="st">Revenue vs budget &mdash; monthly variances (R million)</div>
+      <div class="tw" style="margin-bottom:0">
+        <table class="dt">
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th class="num">Budget (R)</th>
+              <th class="num">Actual (R)</th>
+              <th class="num">Variance (R)</th>
+              <th class="ctr">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="mid">Jan 2026</td><td class="num">742M</td><td class="num v-g">762M</td><td class="num v-g">+20M</td><td class="ctr"><span class="badge bg">Above</span></td></tr>
+            <tr><td class="mid">Feb 2026</td><td class="num">728M</td><td class="num v-g">741M</td><td class="num v-g">+13M</td><td class="ctr"><span class="badge bg">Above</span></td></tr>
+            <tr><td class="mid">Mar 2026</td><td class="num">798M</td><td class="num v-g">818M</td><td class="num v-g">+20M</td><td class="ctr"><span class="badge bg">Above</span></td></tr>
+            <tr><td class="mid">Apr 2026</td><td class="num">804M</td><td class="num v-a">794M</td><td class="num v-r">-10M</td><td class="ctr"><span class="badge bh">Below</span></td></tr>
+            <tr><td class="mid">May 2026</td><td class="num">812M</td><td class="num v-g">841M</td><td class="num v-g">+29M</td><td class="ctr"><span class="badge bg">Above</span></td></tr>
+            <tr><td class="mid"><strong>Jun 2026</strong></td><td class="num"><strong>795M</strong></td><td class="num v-g"><strong>864M</strong></td><td class="num v-g"><strong>+69M</strong></td><td class="ctr"><span class="badge bg">Above</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="notice notice-b" style="margin-top:12px">June outperformance driven by strong winter cold &amp; flu OTC category sales (+R41M) and pharmacy chronic dispensing volume increase (+R22M vs budget). Distribution channel April dip attributed to Easter timing shift.</div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     PANEL 3 — OPERATIONS & SERVICE
+═════════════════════════════════════════════ -->
+<div class="panel" id="p3">
+
+  <p class="intro">Operations and service performance covers retail store operations, technology service management, supply chain fulfilment, and clinical dispensing operations. The primary service KPI is the overall IT SLA achievement across all 7 critical service domains. Supply chain DIFOT (Delivered-In-Full, On-Time) is the primary logistics KPI measured daily across all distribution centres.</p>
+
+  <div class="mrow">
+    <div class="mc"><div class="ml">IT SLA Achievement</div><div class="mv v-a">94.2%</div><div class="ms">Target &ge;95%</div></div>
+    <div class="mc"><div class="ml">Active P1 Incidents</div><div class="mv v-r">1</div><div class="ms">Clinical label print</div></div>
+    <div class="mc"><div class="ml">DIFOT (Supply Chain)</div><div class="mv v-g">94.8%</div><div class="ms">Target &ge;95%</div></div>
+    <div class="mc"><div class="ml">Stock Availability</div><div class="mv v-g">97.2%</div><div class="ms">Across 312 stores</div></div>
+    <div class="mc"><div class="ml">Shrinkage Rate</div><div class="mv v-g">0.84%</div><div class="ms">&#9660; -0.12pp YoY</div></div>
+    <div class="mc"><div class="ml">Dispensing SLA</div><div class="mv v-g">98.1%</div><div class="ms">Script ready in 20 min</div></div>
+    <div class="mc"><div class="ml">Change Success Rate</div><div class="mv v-a">94.4%</div><div class="ms">3 failed changes MTD</div></div>
+    <div class="mc"><div class="ml">DR Test (June)</div><div class="mv v-g">Pass</div><div class="ms">RTO 43 min</div></div>
+  </div>
+
+  <div class="cg">
+    <div>
+      <div class="cb">
+        <div class="st">IT service domain SLA &mdash; June 2026</div>
+        <div class="cbar-wrap">
+          <div class="cbar-label"><span>Identity &amp; Access Mgmt</span><span class="v-g">99.9%</span></div>
+          <div class="cbar"><div class="cbar-fill" style="width:99.9%;background:var(--gt)"></div></div>
+        </div>
+        <div class="cbar-wrap">
+          <div class="cbar-label"><span>POS &amp; Checkout</span><span class="v-a">99.1%</span></div>
+          <div class="cbar"><div class="cbar-fill" style="width:99.1%;background:var(--ot)"></div></div>
+        </div>
+        <div class="cbar-wrap">
+          <div class="cbar-label"><span>Retail ERP Integration</span><span class="v-a">97.8%</span></div>
+          <div class="cbar"><div class="cbar-fill" style="width:97.8%;background:var(--ot)"></div></div>
+        </div>
+        <div class="cbar-wrap">
+          <div class="cbar-label"><span>Warehouse &amp; Logistics</span><span class="v-g">96.3%</span></div>
+          <div class="cbar"><div class="cbar-fill" style="width:96.3%;background:var(--gt)"></div></div>
+        </div>
+        <div class="cbar-wrap">
+          <div class="cbar-label"><span>Reporting &amp; Analytics</span><span class="v-g">95.5%</span></div>
+          <div class="cbar"><div class="cbar-fill" style="width:95.5%;background:var(--gt)"></div></div>
+        </div>
+        <div class="cbar-wrap">
+          <div class="cbar-label"><span>Customer Loyalty</span><span class="v-r">91.0%</span></div>
+          <div class="cbar"><div class="cbar-fill" style="width:91%;background:var(--ot)"></div></div>
+        </div>
+        <div class="cbar-wrap">
+          <div class="cbar-label"><span>Clinical Dispensing</span><span class="v-r">88.2%</span></div>
+          <div class="cbar"><div class="cbar-fill" style="width:88.2%;background:var(--rt)"></div></div>
+        </div>
+      </div>
+
+      <div class="cb0">
+        <div class="st">Supply chain performance &mdash; June 2026</div>
+        <div class="stat-row"><span class="stat-label">DIFOT (all DCs)</span><span class="stat-val v-g">94.8%</span></div>
+        <div class="stat-row"><span class="stat-label">Fill rate (DC to store)</span><span class="stat-val v-g">97.4%</span></div>
+        <div class="stat-row"><span class="stat-label">Avg replenishment lead time</span><span class="stat-val v-g">1.8 days</span></div>
+        <div class="stat-row"><span class="stat-label">Overstock incidents MTD</span><span class="stat-val v-a">14</span></div>
+        <div class="stat-row"><span class="stat-label">Understock incidents MTD</span><span class="stat-val v-a">9</span></div>
+        <div class="stat-row"><span class="stat-label">Cold chain compliance</span><span class="stat-val v-g">99.6%</span></div>
+        <div class="stat-row"><span class="stat-label">Supplier on-time delivery</span><span class="stat-val v-g">91.2%</span></div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="cb">
+        <div class="st">Active service issues &mdash; executive awareness</div>
+        <div class="card" style="border-left-color:var(--rt)">
+          <div class="card-hdr"><span class="card-title">P1 &mdash; INC-20640: Clinical Label Print Failure (14 stores)</span><span class="badge bc">Open</span></div>
+          <div class="card-sub">Zebra Cloud API returning 503 errors since 07:14 today. 14 stores on manual label workaround. CHG-8851 (v4.6.1 permanent fix) staged for 26 Jun pilot. SLA R28k penalty accrued. CIO notified.</div>
+        </div>
+        <div class="card" style="border-left-color:var(--ot)">
+          <div class="card-hdr"><span class="card-title">SLA breach &mdash; Clinical Dispensing at 88.2% (target 99%)</span><span class="badge bh">Breach</span></div>
+          <div class="card-sub">Sustained Zebra API instability contributed 10.8pp shortfall. R28k penalty accrued. Permanent fix CHG-8851 on 28 Jun. Vendor breach notice issued. Executive review scheduled 24 Jun.</div>
+        </div>
+        <div class="card" style="border-left-color:var(--ot)">
+          <div class="card-hdr"><span class="card-title">SLA breach &mdash; Customer Loyalty at 91.0% (target 95%)</span><span class="badge bh">Breach</span></div>
+          <div class="card-sub">Maintenance window overrun (CHG-8809 database migration) added 4.2 hours unplanned downtime. R14k penalty accrued. Retry change CHG-8860 scheduled 25 Jun with extended 5-hour window and revised test plan.</div>
+        </div>
+      </div>
+
+      <div class="cb0">
+        <div class="st">Store operations scorecard &mdash; June 2026</div>
+        <div class="stat-row"><span class="stat-label">Stores trading (total estate)</span><span class="stat-val">312</span></div>
+        <div class="stat-row"><span class="stat-label">New stores opened YTD</span><span class="stat-val v-g">4</span></div>
+        <div class="stat-row"><span class="stat-label">Refurbishments completed YTD</span><span class="stat-val">8</span></div>
+        <div class="stat-row"><span class="stat-label">Avg basket size (Jun)</span><span class="stat-val v-g">R248</span></div>
+        <div class="stat-row"><span class="stat-label">Avg basket size vs PY</span><span class="stat-val v-g">+R18 (+7.8%)</span></div>
+        <div class="stat-row"><span class="stat-label">Transactions per store per day</span><span class="stat-val">682</span></div>
+        <div class="stat-row"><span class="stat-label">Store NPS (in-store survey)</span><span class="stat-val v-g">+48</span></div>
+        <div class="stat-row"><span class="stat-label">Click &amp; collect fulfilment rate</span><span class="stat-val v-g">96.8%</span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     PANEL 4 — CUSTOMER & LOYALTY
+═════════════════════════════════════════════ -->
+<div class="panel" id="p4">
+
+  <p class="intro">Customer and loyalty performance tracks the health and growth of the MedRetail loyalty programme, customer sentiment, and channel engagement. The Smart Card loyalty programme has 1.4 million active members and is the primary vehicle for personalised marketing and customer retention. NPS is measured via monthly independent survey across 800 respondents, stratified by store format and region.</p>
+
+  <div class="mrow">
+    <div class="mc"><div class="ml">Loyalty Members (Active)</div><div class="mv v-g">1.41M</div><div class="ms">&#9650; +28k vs May</div></div>
+    <div class="mc"><div class="ml">New Members (MTD)</div><div class="mv v-g">28 412</div><div class="ms">&#9650; +4.2% vs May</div></div>
+    <div class="mc"><div class="ml">Member Revenue Share</div><div class="mv v-g">68.4%</div><div class="ms">of total retail revenue</div></div>
+    <div class="mc"><div class="ml">Customer NPS</div><div class="mv v-a">+41</div><div class="ms">Target: &ge;+45</div></div>
+    <div class="mc"><div class="ml">Points Issued (MTD)</div><div class="mv">R8.4M</div><div class="ms">Equiv. value</div></div>
+    <div class="mc"><div class="ml">Points Redeemed (MTD)</div><div class="mv">R6.1M</div><div class="ms">72.6% redemption rate</div></div>
+    <div class="mc"><div class="ml">App Downloads (MTD)</div><div class="mv v-g">14 284</div><div class="ms">&#9650; +2 100 vs May</div></div>
+    <div class="mc"><div class="ml">Digital Engagement</div><div class="mv v-g">41.2%</div><div class="ms">Members using app/web</div></div>
+  </div>
+
+  <div class="cg">
+    <div>
+      <div class="cb">
+        <div class="st">NPS trend &mdash; January to June 2026</div>
+        <div class="cbar-wrap">
+          <div class="cbar-label"><span>January 2026</span><span style="font-weight:700">+48</span></div>
+          <div class="cbar"><div class="cbar-fill" style="width:80%;background:var(--gt)"></div></div>
+        </div>
+        <div class="cbar-wrap">
+          <div class="cbar-label"><span>February 2026</span><span style="font-weight:700">+46</span></div>
+          <div class="cbar"><div class="cbar-fill" style="width:77%;background:var(--gt)"></div></div>
+        </div>
+        <div class="cbar-wrap">
+          <div class="cbar-label"><span>March 2026</span><span style="font-weight:700">+47</span></div>
+          <div class="cbar"><div class="cbar-fill" style="width:78%;background:var(--gt)"></div></div>
+        </div>
+        <div class="cbar-wrap">
+          <div class="cbar-label"><span>April 2026</span><span style="font-weight:700">+44</span></div>
+          <div class="cbar"><div class="cbar-fill" style="width:73%;background:var(--ot)"></div></div>
+        </div>
+        <div class="cbar-wrap">
+          <div class="cbar-label"><span>May 2026</span><span style="font-weight:700">+43</span></div>
+          <div class="cbar"><div class="cbar-fill" style="width:72%;background:var(--ot)"></div></div>
+        </div>
+        <div class="cbar-wrap">
+          <div class="cbar-label"><span><strong>June 2026</strong></span><span class="v-a"><strong>+41</strong></span></div>
+          <div class="cbar"><div class="cbar-fill" style="width:68%;background:var(--ot)"></div></div>
+        </div>
+        <div class="notice notice-a" style="margin-top:10px">NPS declining 3 months consecutively. Primary drivers: clinical dispensing wait times (+18% complaint volume), loyalty platform outage in June (maintenance overrun), and app login issues reported by 6.2% of users. CMO action plan due 30 Jun.</div>
+      </div>
+
+      <div class="cb0">
+        <div class="st">Loyalty member value segmentation</div>
+        <div class="cbar-wrap">
+          <div class="cbar-label"><span>Platinum (&gt;R3 000 spend/month)</span><span style="font-weight:700">142k (10.1%)</span></div>
+          <div class="cbar"><div class="cbar-fill" style="width:100%;background:var(--purple)"></div></div>
+        </div>
+        <div class="cbar-wrap">
+          <div class="cbar-label"><span>Gold (R1 000&ndash;R3 000/month)</span><span style="font-weight:700">384k (27.2%)</span></div>
+          <div class="cbar"><div class="cbar-fill" style="width:62%;background:var(--at)"></div></div>
+        </div>
+        <div class="cbar-wrap">
+          <div class="cbar-label"><span>Silver (R400&ndash;R999/month)</span><span style="font-weight:700">512k (36.3%)</span></div>
+          <div class="cbar"><div class="cbar-fill" style="width:46%;background:var(--blue)"></div></div>
+        </div>
+        <div class="cbar-wrap">
+          <div class="cbar-label"><span>Bronze (&lt;R400/month)</span><span style="font-weight:700">372k (26.4%)</span></div>
+          <div class="cbar"><div class="cbar-fill" style="width:34%;background:var(--navy)"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="cb">
+        <div class="st">NPS driver analysis &mdash; June 2026 verbatim themes</div>
+        <div class="card" style="border-left-color:var(--rt)">
+          <div class="card-hdr"><span class="card-title">Dispensing wait times &mdash; top complaint driver</span><span class="badge bc">-8 NPS impact</span></div>
+          <div class="card-sub">Clinical dispensing SLA breach (88.2%) directly causing longer wait times. 18% increase in pharmacy-related NPS detractor responses vs May. Labels issue affecting 14 stores correlates with complaint spike. Resolves when CHG-8851 deploys 28 Jun.</div>
+        </div>
+        <div class="card" style="border-left-color:var(--ot)">
+          <div class="card-hdr"><span class="card-title">Loyalty app login errors &mdash; digital friction</span><span class="badge bh">-4 NPS impact</span></div>
+          <div class="card-sub">6.2% of app users reported login failures in June (iOS token refresh bug). Fix deployed 18 Jun. Impact expected to clear in July NPS cycle. 2 400 affected users received apology reward (200 bonus points).</div>
+        </div>
+        <div class="card" style="border-left-color:var(--gt)">
+          <div class="card-hdr"><span class="card-title">Product availability &mdash; top promoter driver</span><span class="badge bg">+12 NPS impact</span></div>
+          <div class="card-sub">Stock availability at 97.2% is primary promoter. Respondents cite &ldquo;always finding what I need&rdquo; as top positive. Winter category range extension (42 new OTC SKUs) received strong feedback from chronic and acute care customers.</div>
+        </div>
+      </div>
+
+      <div class="cb0">
+        <div class="st">Channel engagement &mdash; June 2026</div>
+        <div class="stat-row"><span class="stat-label">In-store transactions (millions)</span><span class="stat-val v-g">6.42M</span></div>
+        <div class="stat-row"><span class="stat-label">App sessions (monthly active)</span><span class="stat-val v-g">581k</span></div>
+        <div class="stat-row"><span class="stat-label">Online / e-commerce orders</span><span class="stat-val v-g">84 412</span></div>
+        <div class="stat-row"><span class="stat-label">Click &amp; collect orders</span><span class="stat-val v-g">22 184</span></div>
+        <div class="stat-row"><span class="stat-label">WhatsApp channel interactions</span><span class="stat-val">148k</span></div>
+        <div class="stat-row"><span class="stat-label">Email open rate (campaign)</span><span class="stat-val v-g">34.8%</span></div>
+        <div class="stat-row"><span class="stat-label">SMS delivery rate</span><span class="stat-val v-g">99.1%</span></div>
+        <div class="stat-row"><span class="stat-label">Personalised offer click-through</span><span class="stat-val v-g">18.4%</span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     PANEL 5 — PEOPLE & CAPABILITY
+═════════════════════════════════════════════ -->
+<div class="panel" id="p5">
+
+  <p class="intro">People and capability performance covers workforce composition, engagement, recruitment, capability development, and key role vacancies. MedRetail SA employs approximately 8 400 permanent and fixed-term staff across store operations, clinical, supply chain, technology, and head office functions. The employer value proposition is anchored on purpose-driven healthcare retail, competitive pay, and structured development pathways.</p>
+
+  <div class="mrow">
+    <div class="mc"><div class="ml">Total FTE (Group)</div><div class="mv">8 412</div><div class="ms">Perm + fixed-term</div></div>
+    <div class="mc"><div class="ml">Open Vacancies</div><div class="mv v-a">184</div><div class="ms">Critical: 12</div></div>
+    <div class="mc"><div class="ml">Voluntary Turnover (MTD)</div><div class="mv v-g">1.8%</div><div class="ms">&#9660; -0.4pp vs May</div></div>
+    <div class="mc"><div class="ml">Annualised Turnover</div><div class="mv v-a">14.2%</div><div class="ms">Target &le;12%</div></div>
+    <div class="mc"><div class="ml">eNPS Score</div><div class="mv v-g">+38</div><div class="ms">Target &ge;+35</div></div>
+    <div class="mc"><div class="ml">Absenteeism Rate</div><div class="mv v-g">2.4%</div><div class="ms">Target &le;3.0%</div></div>
+    <div class="mc"><div class="ml">Training Hours (MTD)</div><div class="mv v-g">4 841</div><div class="ms">&#9650; +12% vs May</div></div>
+    <div class="mc"><div class="ml">Certifications Completed (Q2)</div><div class="mv v-g">18</div><div class="ms">Tech &amp; clinical</div></div>
+  </div>
+
+  <div class="cg">
+    <div>
+      <div class="cb">
+        <div class="st">Headcount by function &mdash; June 2026</div>
+        <div class="cbar-wrap">
+          <div class="cbar-label"><span>Retail Store Operations</span><span style="font-weight:700">5 184 (61.6%)</span></div>
+          <div class="cbar"><div class="cbar-fill" style="width:100%;background:var(--navy)"></div></div>
+        </div>
+        <div class="cbar-wrap">
+          <div class="cbar-label"><span>Clinical &amp; Pharmacy</span><span style="font-weight:700">1 284 (15.3%)</span></div>
+          <div class="cbar"><div class="cbar-fill" style="width:25%;background:var(--teal)"></div></div>
+        </div>
+        <div class="cbar-wrap">
+          <div class="cbar-label"><span>Supply Chain &amp; Logistics</span><span style="font-weight:700">814 (9.7%)</span></div>
+          <div class="cbar"><div class="cbar-fill" style="width:16%;background:var(--blue)"></div></div>
+        </div>
+        <div class="cbar-wrap">
+          <div class="cbar-label"><span>Head Office &amp; Finance</span><span style="font-weight:700">612 (7.3%)</span></div>
+          <div class="cbar"><div class="cbar-fill" style="width:12%;background:var(--purple)"></div></div>
+        </div>
+        <div class="cbar-wrap">
+          <div class="cbar-label"><span>Technology &amp; Data</span><span style="font-weight:700">418 (5.0%)</span></div>
+          <div class="cbar"><div class="cbar-fill" style="width:8%;background:var(--at)"></div></div>
+        </div>
+        <div class="cbar-wrap">
+          <div class="cbar-label"><span>Marketing &amp; Loyalty</span><span style="font-weight:700">100 (1.2%)</span></div>
+          <div class="cbar"><div class="cbar-fill" style="width:2%;background:#888"></div></div>
+        </div>
+      </div>
+
+      <div class="cb0">
+        <div class="st">Turnover by function &mdash; annualised rate</div>
+        <div class="stat-row"><span class="stat-label">Retail Store Operations</span><span class="stat-val v-a">18.4%</span></div>
+        <div class="stat-row"><span class="stat-label">Clinical &amp; Pharmacy</span><span class="stat-val v-g">8.2%</span></div>
+        <div class="stat-row"><span class="stat-label">Supply Chain &amp; Logistics</span><span class="stat-val v-g">9.4%</span></div>
+        <div class="stat-row"><span class="stat-label">Head Office &amp; Finance</span><span class="stat-val v-g">7.1%</span></div>
+        <div class="stat-row"><span class="stat-label">Technology &amp; Data</span><span class="stat-val v-a">16.8%</span></div>
+        <div class="stat-row"><span class="stat-label">Marketing &amp; Loyalty</span><span class="stat-val v-g">11.2%</span></div>
+        <div class="stat-row"><span class="stat-label"><strong>Group Total</strong></span><span class="stat-val v-a"><strong>14.2%</strong></span></div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="cb">
+        <div class="st">Critical vacancy pipeline &mdash; executive visibility</div>
+        <div class="card" style="border-left-color:var(--rt)">
+          <div class="card-hdr"><span class="card-title">Clinical AI Lead (new role)</span><span class="badge bc">Critical</span></div>
+          <div class="card-sub">New role to accelerate Clinical function AI maturity from Level 1. Headcount approval at Aug Board. Interim: SC data scientist seconded from 1 Jul. Planned start Nov 2026.</div>
+        </div>
+        <div class="card" style="border-left-color:var(--rt)">
+          <div class="card-hdr"><span class="card-title">Senior Infrastructure Engineer</span><span class="badge bc">Critical &mdash; Offer 26 Jun</span></div>
+          <div class="card-sub">Infra team at 95% utilisation. 2 candidates in final round. Offer target 26 Jun. Critical for service SLA recovery &mdash; team cannot absorb further incidents at current capacity.</div>
+        </div>
+        <div class="card" style="border-left-color:var(--ot)">
+          <div class="card-hdr"><span class="card-title">Senior ML Engineer (x2)</span><span class="badge bh">High &mdash; Offer 15 Jul</span></div>
+          <div class="card-sub">Required for Demand Forecasting v2 (AI-013) and Clinical AI programme. 4 candidates at assessment. Salary band R780k&ndash;R950k. Preferred candidate identified for SC role.</div>
+        </div>
+        <div class="card" style="border-left-color:var(--ot)">
+          <div class="card-hdr"><span class="card-title">Senior Analytics Engineers (x2)</span><span class="badge bh">High &mdash; Start Aug</span></div>
+          <div class="card-sub">Analytics team at 140% capacity &mdash; 18 data requests beyond 14-day SLA. Advertising closes 5 Jul. Interview 15 Jul. Start Aug 2026. Directly resolves data request backlog.</div>
+        </div>
+      </div>
+
+      <div class="cb0">
+        <div class="st">Capability programme summary &mdash; Q2 2026</div>
+        <div class="stat-row"><span class="stat-label">AI / Data literacy training completions</span><span class="stat-val v-g">112</span></div>
+        <div class="stat-row"><span class="stat-label">Power BI certifications (PL-300)</span><span class="stat-val v-g">14</span></div>
+        <div class="stat-row"><span class="stat-label">ITIL / service management certs</span><span class="stat-val v-g">4</span></div>
+        <div class="stat-row"><span class="stat-label">Clinical CPD hours (pharmacists)</span><span class="stat-val v-g">2 481h</span></div>
+        <div class="stat-row"><span class="stat-label">Management development programme</span><span class="stat-val">24 enrolled</span></div>
+        <div class="stat-row"><span class="stat-label">Skills programme cohort 2 (start)</span><span class="stat-val">1 Aug 2026</span></div>
+        <div class="stat-row"><span class="stat-label">Bursary / learnership beneficiaries</span><span class="stat-val v-g">88 active</span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     PANEL 6 — TECHNOLOGY & DATA
+═════════════════════════════════════════════ -->
+<div class="panel" id="p6">
+
+  <p class="intro">Technology and data performance consolidates the IT service management, data governance, AI programme, and platform health metrics that support Group operations. This view is designed for technology-informed executives and the Audit and Risk Committee. Key risk areas are data quality below target, POPIA compliance at 81%, and two vendor SLA breaches requiring credit recovery.</p>
+
+  <div class="mrow">
+    <div class="mc"><div class="ml">IT Service SLA</div><div class="mv v-a">94.2%</div><div class="ms">Target &ge;95%</div></div>
+    <div class="mc"><div class="ml">Data Quality Score</div><div class="mv v-r">78.4%</div><div class="ms">Target &ge;85%</div></div>
+    <div class="mc"><div class="ml">POPIA Compliance</div><div class="mv v-r">81%</div><div class="ms">Target &ge;90%</div></div>
+    <div class="mc"><div class="ml">AI Value Realised YTD</div><div class="mv v-a">R4.2M</div><div class="ms">vs R7.8M target</div></div>
+    <div class="mc"><div class="ml">AI Maturity Score</div><div class="mv v-a">2.4/5</div><div class="ms">Level 2 &mdash; Developing</div></div>
+    <div class="mc"><div class="ml">Analytics Users</div><div class="mv">3 141</div><div class="ms">&#9650; +118 vs May</div></div>
+    <div class="mc"><div class="ml">Vendor SLA Breaches</div><div class="mv v-r">2</div><div class="ms">Zebra &bull; Oracle</div></div>
+    <div class="mc"><div class="ml">Cyber Risk Open Items</div><div class="mv v-a">3</div><div class="ms">Unpatched CVEs</div></div>
+  </div>
+
+  <div class="cg">
+    <div>
+      <div class="cb">
+        <div class="st">Technology risk register &mdash; executive summary</div>
+        <div class="card" style="border-left-color:var(--rt)">
+          <div class="card-hdr"><span class="card-title">POPIA &mdash; 81% compliance, 3 Regulator findings open</span><span class="badge bc">Critical</span></div>
+          <div class="card-sub">POS retention schedule unpublished (REG-F01), cross-border analytics transfer undocumented (REG-F02), 102 817 loyalty members need re-consent (REG-F03). DPO remediation plan to Regulator 15 Jul. Board Privacy Committee Sep 2026.</div>
+        </div>
+        <div class="card" style="border-left-color:var(--rt)">
+          <div class="card-hdr"><span class="card-title">Data quality &mdash; 78.4%, patient records 58.1%</span><span class="badge bc">Critical</span></div>
+          <div class="card-sub">4 831 duplicate patient IDs blocking Clinical Analytics v2 and AI Script Adherence model. Deduplication engine running &mdash; target golden record 30 Jun. Uniqueness dimension at 69.8% is lowest scoring.</div>
+        </div>
+        <div class="card" style="border-left-color:var(--rt)">
+          <div class="card-hdr"><span class="card-title">AI Ethics Framework &mdash; no Board approval yet</span><span class="badge bc">Critical</span></div>
+          <div class="card-sub">3 patient-facing AI use cases (R2.7M value) blocked until Board-approved framework. DPO drafting for 31 Jul consultation. Board presentation 18 Sep 2026. Clinical function AI maturity cannot advance without this.</div>
+        </div>
+        <div class="card" style="border-left-color:var(--ot)">
+          <div class="card-hdr"><span class="card-title">Oracle contract expires Aug 2026 &mdash; no renewal signed</span><span class="badge bh">High</span></div>
+          <div class="card-sub">Database contract expiry creates service continuity risk. SLA breach on record. AWS RDS alternative being evaluated. CIO to present renewal or migration recommendation by 30 Jun. Decision required 15 Jul.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="cb">
+        <div class="st">Technology KPI summary &mdash; June 2026 vs targets</div>
+        <div class="tw" style="margin-bottom:0">
+          <table class="dt">
+            <thead>
+              <tr><th>Technology KPI</th><th class="num">Target</th><th class="num">Actual</th><th class="ctr">Status</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="mid">IT SLA &mdash; overall</td><td class="num">&ge;95%</td><td class="num v-a">94.2%</td><td class="ctr"><span class="badge bh">Miss</span></td></tr>
+              <tr><td class="mid">P1 MTTR (avg)</td><td class="num">&le;2 h</td><td class="num v-r">2.8 h</td><td class="ctr"><span class="badge bc">Miss</span></td></tr>
+              <tr><td class="mid">Change success rate</td><td class="num">&ge;97%</td><td class="num v-a">94.4%</td><td class="ctr"><span class="badge bh">Miss</span></td></tr>
+              <tr><td class="mid">Data quality score</td><td class="num">&ge;85%</td><td class="num v-r">78.4%</td><td class="ctr"><span class="badge bc">Miss</span></td></tr>
+              <tr><td class="mid">POPIA compliance</td><td class="num">&ge;90%</td><td class="num v-r">81%</td><td class="ctr"><span class="badge bc">Miss</span></td></tr>
+              <tr><td class="mid">AI maturity score</td><td class="num">3.0 (Dec)</td><td class="num v-a">2.4</td><td class="ctr"><span class="badge bm">On Track</span></td></tr>
+              <tr><td class="mid">Platform uptime (analytics)</td><td class="num">&ge;99.5%</td><td class="num v-a">97.8%</td><td class="ctr"><span class="badge bc">Miss</span></td></tr>
+              <tr><td class="mid">Data literacy (&ge;Tier 1)</td><td class="num">&ge;80%</td><td class="num v-a">68%</td><td class="ctr"><span class="badge bh">Miss</span></td></tr>
+              <tr><td class="mid">Analytics DAU ratio</td><td class="num">&ge;50%</td><td class="num v-a">41%</td><td class="ctr"><span class="badge bh">Miss</span></td></tr>
+              <tr><td class="mid">DR test result</td><td class="num">Pass</td><td class="num v-g">Pass (43 min)</td><td class="ctr"><span class="badge bg">Met</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="cb0">
+        <div class="st">AI programme &mdash; value vs target (YTD R million; itemised functions)</div>
+        <div class="cbar-wrap">
+          <div class="cbar-label"><span>Finance &amp; GL (AI-001, AI-002)</span><span class="v-g">R1.17M</span></div>
+          <div class="cbar"><div class="cbar-fill" style="width:100%;background:var(--gt)"></div></div>
+        </div>
+        <div class="cbar-wrap">
+          <div class="cbar-label"><span>Supply Chain (AI-003, AI-004)</span><span class="v-g">R1.13M</span></div>
+          <div class="cbar"><div class="cbar-fill" style="width:97%;background:var(--gt)"></div></div>
+        </div>
+        <div class="cbar-wrap">
+          <div class="cbar-label"><span>Retail &amp; Loyalty (AI-005)</span><span class="v-g">R0.31M</span></div>
+          <div class="cbar"><div class="cbar-fill" style="width:27%;background:var(--blue)"></div></div>
+        </div>
+        <div class="cbar-wrap">
+          <div class="cbar-label"><span>HR &amp; Operations (AI-006, AI-007, AI-008)</span><span class="v-g">R0.59M</span></div>
+          <div class="cbar"><div class="cbar-fill" style="width:50%;background:var(--teal)"></div></div>
+        </div>
+        <div class="cbar-wrap">
+          <div class="cbar-label"><span>Blocked use cases (AI-013, 014, 015)</span><span class="v-r">R0</span></div>
+          <div class="cbar"><div class="cbar-fill" style="width:0%;background:var(--rt)"></div></div>
+        </div>
+        <div class="notice notice-a" style="margin-top:10px">Functions shown itemise R3.2M of the R4.2M YTD value; the balance sits in use cases not itemised here. R2.1M of R7.8M annual target at risk due to 3 blocked use cases. Unblocking GPU infrastructure (30 Jun), data quality fix (30 Jun), and governance approval (15 Aug) would restore the run-rate to R5.7M (R7.8M target less the R2.1M shortfall) by Q4 2026.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     PANEL 7 — STRATEGIC PROGRAMMES
+═════════════════════════════════════════════ -->
+<div class="panel" id="p7">
+
+  <p class="intro">Strategic programmes are cross-functional initiatives that deliver against the Group&rsquo;s 5-year transformation strategy: digitising the retail and clinical experience, building data and AI capability, expanding the store estate, and scaling the loyalty ecosystem. Each programme is tracked via a Board-level KPI set and reviewed monthly by the ExCo Programme Office.</p>
+
+  <div class="mrow">
+    <div class="mc"><div class="ml">Active Programmes</div><div class="mv">8</div><div class="ms">Board-tracked</div></div>
+    <div class="mc"><div class="ml">On Track</div><div class="mv v-g">4</div><div class="ms">Delivering to plan</div></div>
+    <div class="mc"><div class="ml">At Risk</div><div class="mv v-a">3</div><div class="ms">Intervention needed</div></div>
+    <div class="mc"><div class="ml">Paused / Replanned</div><div class="mv v-a">1</div><div class="ms">Resource constraint</div></div>
+    <div class="mc"><div class="ml">Total Prog. Budget (FY26)</div><div class="mv">R184M</div><div class="ms">Approved by Board</div></div>
+    <div class="mc"><div class="ml">Budget Utilised YTD</div><div class="mv v-g">R88M</div><div class="ms">48% &mdash; on plan</div></div>
+    <div class="mc"><div class="ml">Benefits Realised YTD</div><div class="mv v-a">R51M</div><div class="ms">vs R74M H1 target</div></div>
+    <div class="mc"><div class="ml">Prog. Issues Open</div><div class="mv v-a">14</div><div class="ms">4 at risk of delay</div></div>
+  </div>
+
+  <!-- Programme status strip -->
+  <div class="esc-strip">
+    <div class="esc-hdr" style="grid-template-columns:200px 1fr 90px 100px 80px 90px 90px">
+      <span>Programme</span>
+      <span>Programme Director</span>
+      <span class="esc-stat">Budget (R)</span>
+      <span class="esc-stat">YTD Spend (R)</span>
+      <span class="esc-stat">% Used</span>
+      <span class="esc-stat">Benefits YTD</span>
+      <span class="esc-stat">Status</span>
+    </div>
+    <div class="esc-row" style="grid-template-columns:200px 1fr 90px 100px 80px 90px 90px">
+      <div style="font-weight:700">Store Estate Expansion</div>
+      <div style="font-size:11px;color:var(--text2)">Chief Retail Officer</div>
+      <div class="esc-stat">R48M</div><div class="esc-stat">R22M</div><div class="esc-stat">46%</div>
+      <div class="esc-stat v-g">R18M</div>
+      <div class="esc-stat"><span class="badge bg">On Track</span></div>
+    </div>
+    <div class="esc-row" style="grid-template-columns:200px 1fr 90px 100px 80px 90px 90px">
+      <div style="font-weight:700">Loyalty Platform Upgrade</div>
+      <div style="font-size:11px;color:var(--text2)">CMO</div>
+      <div class="esc-stat">R22M</div><div class="esc-stat">R11M</div><div class="esc-stat">50%</div>
+      <div class="esc-stat v-g">R9M</div>
+      <div class="esc-stat"><span class="badge bg">On Track</span></div>
+    </div>
+    <div class="esc-row" style="grid-template-columns:200px 1fr 90px 100px 80px 90px 90px">
+      <div style="font-weight:700">Supply Chain Digitisation</div>
+      <div style="font-size:11px;color:var(--text2)">Head of Supply Chain</div>
+      <div class="esc-stat">R31M</div><div class="esc-stat">R14M</div><div class="esc-stat">45%</div>
+      <div class="esc-stat v-g">R11M</div>
+      <div class="esc-stat"><span class="badge bg">On Track</span></div>
+    </div>
+    <div class="esc-row" style="grid-template-columns:200px 1fr 90px 100px 80px 90px 90px">
+      <div style="font-weight:700">Clinical IT Modernisation</div>
+      <div style="font-size:11px;color:var(--text2)">Head of Clinical / CIO</div>
+      <div class="esc-stat">R28M</div><div class="esc-stat">R16M</div><div class="esc-stat">57%</div>
+      <div class="esc-stat v-a">R2M</div>
+      <div class="esc-stat"><span class="badge bh">At Risk</span></div>
+    </div>
+    <div class="esc-row" style="grid-template-columns:200px 1fr 90px 100px 80px 90px 90px">
+      <div style="font-weight:700">AI &amp; Data Capability Build</div>
+      <div style="font-size:11px;color:var(--text2)">CDO</div>
+      <div class="esc-stat">R24M</div><div class="esc-stat">R12M</div><div class="esc-stat">50%</div>
+      <div class="esc-stat v-a">R4M</div>
+      <div class="esc-stat"><span class="badge bh">At Risk</span></div>
+    </div>
+    <div class="esc-row" style="grid-template-columns:200px 1fr 90px 100px 80px 90px 90px">
+      <div style="font-weight:700">POPIA &amp; Data Governance</div>
+      <div style="font-size:11px;color:var(--text2)">DPO / CDO</div>
+      <div class="esc-stat">R14M</div><div class="esc-stat">R7M</div><div class="esc-stat">50%</div>
+      <div class="esc-stat v-a">R1M</div>
+      <div class="esc-stat"><span class="badge bh">At Risk</span></div>
+    </div>
+    <div class="esc-row" style="grid-template-columns:200px 1fr 90px 100px 80px 90px 90px">
+      <div style="font-weight:700">Digital Customer Experience</div>
+      <div style="font-size:11px;color:var(--text2)">CMO / CTO</div>
+      <div class="esc-stat">R12M</div><div class="esc-stat">R4M</div><div class="esc-stat">33%</div>
+      <div class="esc-stat v-g">R6M</div>
+      <div class="esc-stat"><span class="badge bg">On Track</span></div>
+    </div>
+    <div class="esc-row" style="grid-template-columns:200px 1fr 90px 100px 80px 90px 90px">
+      <div style="font-weight:700">Infrastructure Refresh</div>
+      <div style="font-size:11px;color:var(--text2)">VP Infrastructure / CTO</div>
+      <div class="esc-stat">R5M</div><div class="esc-stat">R2M</div><div class="esc-stat">40%</div>
+      <div class="esc-stat">R0</div>
+      <div class="esc-stat"><span class="badge bm">Paused</span></div>
+    </div>
+  </div>
+
+  <div class="cg" style="margin-bottom:0">
+    <div class="cb0">
+      <div class="st">At-risk programme detail</div>
+      <div class="card" style="border-left-color:var(--ot)">
+        <div class="card-hdr"><span class="card-title">Clinical IT Modernisation &mdash; data quality &amp; AI ethics blockers</span><span class="badge bh">At Risk</span></div>
+        <div class="card-sub">Clinical dispensing system upgrade delayed by patient data quality issues (DQI-041) and AI ethics gate. Label print failure (P1 INC-20640) absorbing programme team bandwidth. Benefits delivery of R18M in FY26 now at risk. Replanning underway for revised H2 milestones.</div>
+      </div>
+      <div class="card" style="border-left-color:var(--ot)">
+        <div class="card-hdr"><span class="card-title">AI &amp; Data Capability Build &mdash; three blocked use cases</span><span class="badge bh">At Risk</span></div>
+        <div class="card-sub">R2.1M of R7.8M AI value target blocked by GPU infrastructure delay, patient data quality, and governance approval. Data governance programme (data quality, POPIA, catalogue) progressing but below target velocity. Q3 recovery plan being prepared by CDO.</div>
+      </div>
+      <div class="card" style="border-left-color:var(--ot)">
+        <div class="card-hdr"><span class="card-title">POPIA &amp; Data Governance &mdash; 3 open Regulator findings</span><span class="badge bh">At Risk</span></div>
+        <div class="card-sub">Programme behind plan on data retention schedules (3 of 8 outstanding), PAIA Manual update (15 months overdue), and consent management. DPO remediation plan to Information Regulator 15 Jul. Board Privacy Committee oversight Sep 2026.</div>
+      </div>
+    </div>
+
+    <div class="cb0">
+      <div class="st">Strategic programme milestones &mdash; H2 2026 schedule</div>
+      <div class="tl">
+        <div class="tl-item">
+          <div class="tl-dot" style="background:var(--rt)"></div>
+          <div class="tl-time">30 June 2026</div>
+          <div class="tl-title">Patient Master golden record &amp; GPU infrastructure decision</div>
+          <div class="tl-desc">Deduplication due to complete. Oracle renewal position paper to CIO. GPU commitment sign-off by CTO.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot" style="background:var(--ot)"></div>
+          <div class="tl-time">15 July 2026</div>
+          <div class="tl-title">Supplier golden record go-live &bull; Oracle contract decision</div>
+          <div class="tl-desc">SAP MDG vendor master golden record planned live. CIO decision on Oracle renewal or AWS RDS migration path.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot" style="background:var(--ot)"></div>
+          <div class="tl-time">31 July 2026</div>
+          <div class="tl-title">AI Ethics Framework draft &bull; Data catalogue Phase 2</div>
+          <div class="tl-desc">AIF-001 distributed for consultation. 3 000-asset catalogue go-live. POS retention schedule published to Regulator.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot" style="background:var(--blue)"></div>
+          <div class="tl-time">1 August 2026</div>
+          <div class="tl-title">800 Power BI PPU licences activated &bull; AI skills cohort 2</div>
+          <div class="tl-desc">Analytics self-service expands to 2 000 users. AI skills programme cohort 2 commences (68 enrolled).</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot" style="background:var(--blue)"></div>
+          <div class="tl-time">31 August 2026</div>
+          <div class="tl-title">Clinical Dispensing Analytics v2 go-live &bull; Model Risk Policy</div>
+          <div class="tl-desc">Clinical BI product go-live planned post-data quality fix. MRM-001 approval planned for 15 Aug (Steering Committee 13 Aug). AI model register complete (17 use cases).</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot" style="background:var(--purple)"></div>
+          <div class="tl-time">18 September 2026</div>
+          <div class="tl-title">AI Ethics Framework to Board for approval</div>
+          <div class="tl-desc">Board Privacy Committee presentation. Approval unlocks 3 patient-facing AI use cases (R2.7M value) in Q4 2026.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot" style="background:var(--gt)"></div>
+          <div class="tl-time">December 2026</div>
+          <div class="tl-title">AI maturity target Level 3 (Defined)</div>
+          <div class="tl-desc">Target: data quality &ge;85%, POPIA &ge;90%, AI maturity 3.0/5, analytics DAU ratio &ge;50%, 400 Data Creators certified.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<section class="portfolio-about" id="about-this-portfolio">
+  <h2>About This Portfolio</h2>
+  <p><strong>Prepared by:</strong> Divan Gerber &mdash; Independent Portfolio Exercise.</p>
+  <p>This page is part of a self-directed learning project built to demonstrate practical Governance, Risk &amp; Compliance and IT Audit capability. &ldquo;MedRetail Group South Africa&rdquo; and its &ldquo;Data, Analytics &amp; AI Governance Office&rdquo; are fictional constructs created for this exercise. No real organization, department, employee, patient, customer, board, or confidential data is represented here, and the dashboard is a static design prototype, not a live system. Real product, vendor and statute names (listed in the banner above) are scenario context only; every figure, incident and finding attributed to them is invented and says nothing about their actual products or conduct. Revenue, KPI, programme, benefit and compliance figures, and the Board and committee decisions and roles shown, are simulated scenario content. This is not a role or office Divan Gerber has held.</p>
+</section>
+
+</body>
+</html>
